@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discogs YouTube Replacement (experimental)
 // @namespace    local.discogs.youtube-replacement
-// @version      0.9.0
+// @version      0.10.0
 // @description  Stable Discogs player and video list; hide verified YouTube overlays.
 // @match        https://www.discogs.com/*
 // @match        https://discogs.com/*
@@ -41,7 +41,9 @@
         .ytp-cards-teaser,
         .ytp-cards-button,
         .ytp-suggested-action,
-        .ytp-autonav-endscreen-upnext-container {
+        .ytp-autonav-endscreen-upnext-container,
+        .ytPlayerStoryboardHost,
+        .ytPlayerStoryboardStoryboardImageWrapper {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
@@ -124,7 +126,20 @@
     const oldStyle = original.getAttribute('style');
     section.insertBefore(panel, original);
     original.style.setProperty('display', 'none', 'important');
+
+    // Remove the iframe title that triggers the browser tooltip over the seek bar.
+    // YouTube writes it again on video changes, so watch for replacements/updates.
+    const removeIframeTitles = () => {
+      panel.querySelectorAll('iframe[title]').forEach(frame => frame.removeAttribute('title'));
+    };
+    const titleObserver = new MutationObserver(removeIframeTitles);
+    titleObserver.observe(panel, {
+      subtree: true, childList: true, attributes: true, attributeFilter: ['title']
+    });
+    removeIframeTitles();
+
     cleanup = () => {
+      titleObserver.disconnect();
       panel.remove();
       if (oldStyle === null) original.removeAttribute('style');
       else original.setAttribute('style', oldStyle);
