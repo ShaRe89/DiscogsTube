@@ -10,6 +10,7 @@ DiscogsTube uses its own YouTube iframe player instead of Discogs' playlist sync
 - Original YouTube video titles (with a fallback when a title is unavailable)
 - A full-length video list integrated into the Discogs video section
 - Cleaner YouTube embeds: hides Share, Watch later, Watch on YouTube, captions, fullscreen controls and recommendation overlays
+- Hides seek-bar storyboard thumbnails and suppresses the iframe title tooltip, including after video changes
 - Keeps the channel information, volume, settings, timeline and playback controls
 - Works on Discogs release and master pages
 
@@ -30,11 +31,11 @@ DiscogsTube is a **userscript**, so you need a userscript manager. **Violentmonk
 4. Disable any older Discogs video replacement scripts to avoid conflicts.
 5. Open or reload a Discogs release or master page.
 
-**Compatibility note:** The current v0.9 implementation was tested with **Violentmonkey in Waterfox only**. Other managers may handle the `@inject-into page` directive, page context, and frame injection differently; their support is not yet verified. Browser support for a manager does not imply that DiscogsTube has been tested with it.
+**Compatibility note:** The v0.9 player was tested with **Violentmonkey in Waterfox**. The two v0.10 tooltip fixes were confirmed individually in the browser console; the combined v0.10 userscript still needs a full live test. Other managers may handle the `@inject-into page` directive, page context, and frame injection differently; their support is not yet verified. Browser support for a manager does not imply that DiscogsTube has been tested with it.
 
 ## Notes
 
-- Current release: **v0.9.0**, tested in Waterfox.
+- Current version: **v0.10.0** (pending full live verification).
 - This project is unofficial and is not affiliated with Discogs or YouTube.
 - YouTube's iframe UI and Discogs' page structure may change. Some videos or titles may be unavailable due to external restrictions.
-- The v0.9 userscript is included **unchanged**, preserving the working, user-tested implementation.
+- v0.10 retains the v0.9 playback and video-list logic; only the seek-preview and iframe-title suppression were added.
