@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Discogs YouTube Replacement (experimental)
 // @namespace    local.discogs.youtube-replacement
-// @version      0.10.0
+// @version      0.11.0
 // @description  Stable Discogs player and video list; hide verified YouTube overlays.
 // @match        https://www.discogs.com/*
 // @match        https://discogs.com/*
 // @match        https://www.youtube.com/embed/*
 // @match        https://www.youtube-nocookie.com/embed/*
-// @run-at       document-idle
+// @run-at       document-start
 // @grant        none
 // @inject-into  page
 // ==/UserScript==
@@ -58,6 +58,29 @@
 
   // Do not run Discogs' video replacement logic inside YouTube frames or other sites.
   if (!/(^|\.)discogs\.com$/.test(location.hostname) || window.top !== window) return;
+
+  // Run from document-start: suppress clicks on Discogs' original Play button
+  // before React can start an invisible background player. Never touch our UI.
+  const originalPlayButton = target => {
+    if (!(target instanceof Element)) return false;
+    const button = target.closest('button[aria-label="Play"], [role="button"][aria-label="Play"]');
+    if (!button || button.closest('#discogs-console-player')) return false;
+    const section = button.closest('section');
+    if (!section) return false;
+    return !!section.querySelector('img[src*="ytimg.com/vi/"]') ||
+      [...section.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]')]
+        .some(h => /^Videos(?:\s*\(\d+\))?/i.test(h.textContent.trim()));
+  };
+  const blockOriginalPlay = event => {
+    if (!/^\/(?:release|master)\/\d+/.test(location.pathname)) return;
+    if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+    if (!originalPlayButton(event.target)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+  for (const type of ['pointerdown', 'mousedown', 'click', 'keydown']) {
+    window.addEventListener(type, blockOriginalPlay, true);
+  }
   const TAG = '[Discogs Player]';
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   let route = '', cleanup = () => {}, generation = 0, pending = 0;
